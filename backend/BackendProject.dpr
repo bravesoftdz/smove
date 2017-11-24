@@ -6,7 +6,7 @@ program BackendProject;
 
 uses
   System.SysUtils,
-  Smove.Resources in 'Smove.Resources.pas',
+  Smove.Server.Resources in 'Smove.Server.Resources.pas',
   MARS.HTTP.Server.Indy,
   MARS.Core.Engine,
   MARS.Core.Application;

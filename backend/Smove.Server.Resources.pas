@@ -1,4 +1,4 @@
-unit Smove.Resources;
+unit Smove.Server.Resources;
 
 interface
 
