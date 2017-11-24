@@ -7,6 +7,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
   end;
 
 implementation

@@ -9,7 +9,8 @@ uses
   Smove.Server.Resources in 'Smove.Server.Resources.pas',
   MARS.HTTP.Server.Indy,
   MARS.Core.Engine,
-  MARS.Core.Application;
+  MARS.Core.Application,
+  Smove.Data.Prolog.Utils in 'Smove.Data.Prolog.Utils.pas';
 
 type
   TServer = class
