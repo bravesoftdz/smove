@@ -1,4 +1,4 @@
-unit Resources;
+unit Smove.Resources;
 
 interface
 
@@ -14,10 +14,16 @@ uses
 type
   [Path('/backend')]
   TBackendResource = class
-
+    [GET, Path('/')]
+    function Hi: string;
   end;
 
 implementation
+
+function TBackendResource.Hi: string;
+begin
+  Result := 'Hi!';
+end;
 
 initialization
 
