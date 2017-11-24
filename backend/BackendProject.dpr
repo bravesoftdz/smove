@@ -30,7 +30,7 @@ begin
   try
     Engine.Port := 80;
     Engine.ThreadPoolSize := 4;
-    Engine.AddApplication('Smove', '/smove',['Resources.*']);
+    Engine.AddApplication('Smove', '/smove',['Smove.Server.Resources.*']);
     FServer := TMARShttpServerIndy.Create(Engine);
     try
       Server.DefaultPort := Engine.Port;
