@@ -20,7 +20,7 @@ type
       FNodeIds: TDictionary<string, TRoadElement>;
       procedure ProcessWay(AWay: IXMLNode);
       procedure SaveWayForSecondStep(AWay: IXMLNode);
-      procedure ProcessTag(ATag: IXMLNode, ARoad: TRoadElement);
+      procedure ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
       procedure ProcessNode(ANode: IXMLNode);
     public
       constructor Create;
@@ -62,48 +62,48 @@ begin
     Tag := AWay.ChildNodes.Get(i);
     if Tag.HasAttribute('k') then
       begin
-        ProcessTag(Tag,Road);
+        ProcessTag(Tag,NewRoad);
       end;
   end;
 end;
 
-procedure TOSMParser.ProcessTag(ATag: IXMLNode, ARoad: TRoadElement);
+procedure TOSMParser.ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
 var s: string;
 begin
   if ATag.Attributes['k'] = 'highway' then
-      ARoad.FKind.FromString(ATag.Attributes['v']);
+      ARoad.Kind.FromString(ATag.Attributes['v']);
   if ATag.Attributes['k'] = 'surface' then
     begin
       if ATag.Attributes['v'] = 'paved' then
-        ARoad.FSurface := stPaved;
+        ARoad.Surface := sfPaved;
       if ATag.Attributes['v'] = 'asphalt' then
-        ARoad.FSurface := stAsphalt;
+        ARoad.Surface := sfAsphalt;
       if ATag.Attributes['v'] = 'sett' then
-        ARoad.FSurface := stSett;
+        ARoad.Surface := sfSett;
       if ATag.Attributes['v'] = 'concrete' then
-        ARoad.FSurface := stConcrete;
+        ARoad.Surface := sfConcrete;
       if ATag.Attributes['v'] = 'paving_stones' then
-        ARoad.FSurface := stPavingStones;
+        ARoad.Surface := sfPavingStones;
       if ATag.Attributes['v'] = 'cobblestone' then
-        ARoad.FSurface := stCobblestone;
+        ARoad.Surface := sfCobblestone;
       if ATag.Attributes['v'] = 'metal' then
-        ARoad.FSurface := stMetal;
+        ARoad.Surface := sfMetal;
       if ATag.Attributes['v'] = 'wood' then
-        ARoad.FSurface := stWood;
+        ARoad.Surface := sfWood;
       if ATag.Attributes['v'] = 'unpaved' then
-        ARoad.FSurface := stUnpaved;
+        ARoad.Surface := sfUnpaved;
       if ATag.Attributes['v'] = 'compacted' then
-        ARoad.FSurface := stCompacted;
+        ARoad.Surface := sfCompacted;
       if ATag.Attributes['v'] = 'dirt' then
-        ARoad.FSurface := stDirt;
+        ARoad.Surface := sfDirt;
       if ATag.Attributes['v'] = 'earth' then
-        ARoad.FSurface := stEarth;
+        ARoad.Surface := sfEarth;
       if ATag.Attributes['v'] = 'grass_paver' then
-        ARoad.FSurface := stGrassPaver;
+        ARoad.Surface := sfGrassPaver;
       if ATag.Attributes['v'] = 'gravel_turf' then
-        ARoad.FSurface := stGravelTurff;
+        ARoad.Surface := sfGravelTurf;
       if ATag.Attributes['v'] = 'sand' then
-        ARoad.FSurface := stSand;
+        ARoad.Surface := sfSand;
     end;
   if (ATag.Attributes['k'] = 'sidewalk:right:width') or
   (ATag.Attributes['k'] = 'sidewalk:left:width') or
@@ -115,10 +115,10 @@ begin
   (ATag.Attributes['k'] = 'sidewalk:both:incline') then
     begin
       if ATag.Attributes['v'] = 'up' then
-        ARoad.Slope := sUp;
+        ARoad.Slope := slUp;
       if ATag.Attributes['v'] = 'down' then
-        ARoad.Slope := sDown;
-      s := ATag.Attributes;
+        ARoad.Slope := slDown;
+      s := ATag.Attributes['v'];
       if s[Length(s)] in ['%','°'] then
       begin
         ARoad.Slope := TSlope(Sign(s.TrimRight(['%','°',' ']).ToDouble));
@@ -131,8 +131,8 @@ var i: integer;
     Way, Node: IXMLNode;
     b: set of byte;
 begin
-  FNodeIds := TDictionary<string,TRoadKind>.Create;
-  FResult := TList<TRoadKind>.Create;
+  FNodeIds := TDictionary<string,TRoadElement>.Create;
+  FResult := TList<TRoadElement>.Create;
   FXML.LoadFromFile(AFilename);
 
   //Process ways

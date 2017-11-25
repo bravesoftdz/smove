@@ -10,7 +10,8 @@ uses
   MARS.HTTP.Server.Indy,
   MARS.Core.Engine,
   MARS.Core.Application,
-  Smove.Data.Prolog.Utils in 'Smove.Data.Prolog.Utils.pas';
+  Smove.Data.Prolog.Utils in 'Smove.Data.Prolog.Utils.pas',
+  SMove.OSM.Parser in 'SMove.OSM.Parser.pas';
 
 type
   TServer = class

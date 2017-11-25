@@ -89,7 +89,7 @@ type
     procedure WriteDependency(const AFileName: String);
     procedure WriteFact(const APredicate: String;
       const AArguments: TArray<String>);
-    procedure WriteRule(const A
+    //procedure WriteRule(const A
   public
     property FileName: String read FFileName;
     property Elements: TArray<TRoadElement> write SetElements;
