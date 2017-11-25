@@ -20,7 +20,7 @@ type
       FNodeIds: TDictionary<string, TPointF>;
       procedure ProcessWay(AWay: IXMLNode);
       procedure ProcessTagsAndSave(AWay: IXMLNode);
-      procedure ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
+      procedure ProcessTag(ATag: IXMLNode;var ARoad: TRoadElement);
       procedure ProcessNode(ANode: IXMLNode);
       function FindEndpoints(APoints: TList<TPointF>): TEndPoints;
       function CalculateLength(APoints: TList<TPointF>): Double;
@@ -79,11 +79,11 @@ begin
   FResult.Add(NewRoad);
 end;
 
-procedure TOSMParser.ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
+procedure TOSMParser.ProcessTag(ATag: IXMLNode;var ARoad: TRoadElement);
 var s: string;
 begin
   if ATag.Attributes['k'] = 'highway' then
-      ARoad.Kind.FromString(ATag.Attributes['v']);
+      ARoad.Kind := ARoad.Kind.FromString(ATag.Attributes['v']);
   if ATag.Attributes['k'] = 'surface' then
     begin
       if ATag.Attributes['v'] = 'paved' then

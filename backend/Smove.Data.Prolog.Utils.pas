@@ -33,13 +33,13 @@ type
 
   TRoadKind = (rkMotorway, rkTrunk, rkPrimary, rkSecondary, rkTertiary,
     rkUnclassified, rkResidential, rkService, rkFootway, rkBridleway, rkSteps,
-    rkPath, rkCycleway);
+    rkPath, rkCycleway, rkPedestrain);
 
   TRoadKindHelper = record helper for TRoadKind
   protected const
     ValueStrings: array [TRoadKind] of String = ('motorway', 'trunk', 'primary',
       'secondary', 'tertiary', 'unclassified', 'residential', 'service',
-      'footway', 'bridleway', 'steps', 'path', 'cycleway');
+      'footway', 'bridleway', 'steps', 'path', 'cycleway', 'pedestrian');
   public
     function ToString: String;
     class function FromString(const S: String): TRoadKind; static;
