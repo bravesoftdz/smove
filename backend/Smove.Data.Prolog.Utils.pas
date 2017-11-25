@@ -153,9 +153,16 @@ begin
 end;
 
 class function TRoadKindHelper.FromString(const S: String): TRoadKind;
+var
+  Index: Integer;
 begin
   try
-    Result := TRoadKind(IndexStr(S, ValueStrings));
+    Index := IndexStr(S, ValueStrings);
+    if Index < 0 then
+    begin
+      //raise Exception.CreateFmt('Invalid road kind string: ''%s''', [S]);
+    end;
+    Result := TRoadKind(Index);
   except
     Result := rkUnclassified;
   end;

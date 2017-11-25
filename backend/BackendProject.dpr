@@ -50,21 +50,10 @@ end;
 
 var
   Server: TServer;
-  md: TPrologMapData;
-  ap: TPrologApplication;
-  points: tendpoints;
 begin
   try
     Server := TServer.Create;
     try
-        md := TPrologMapData.Create('test.pl');
-        points[0] := TPointF.Create(1,2);
-        points[1] := TPointF.Create(3,4);
-        try
-        md.Elements := [TRoadElement.Create(rkMotorway, sfPaved, points,[],45,3,slDown)];
-        finally
-        md.Free;
-        end;
       repeat
         // :)
       until (False);
