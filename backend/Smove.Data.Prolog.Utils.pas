@@ -89,7 +89,8 @@ type
     procedure WriteDependency(const AFileName: String);
     procedure WriteFact(const APredicate: String;
       const AArguments: TArray<String>);
-    //procedure WriteRule(const A
+    procedure WriteRule(const AName: String; const AArguments: TArray<String>;
+      const ADefinition: String);
   public
     property FileName: String read FFileName;
     property Elements: TArray<TRoadElement> write SetElements;
@@ -222,6 +223,13 @@ procedure TPrologMapData.WriteFact(const APredicate: String;
 begin
   WriteLn(FFactsFile, Concat(APredicate, IfThen(Length(AArguments) <> 0,
     Concat('(', String.Join(',', AArguments), ')')), '.'));
+end;
+
+procedure TPrologMapData.WriteRule(const AName: String;
+  const AArguments: TArray<String>; const ADefinition: String);
+begin
+  WriteLn(FFactsFile, Concat(AName, IfThen(Length(AArguments) <> 0,
+    Concat('(', String.Join(',', AArguments), ')')), ' :- ', ADefinition, '.'));
 end;
 
 end.
