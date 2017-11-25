@@ -94,7 +94,7 @@ type
   public
     property FileName: String read FFileName;
     property Elements: TArray<TRoadElement> write SetElements;
-    constructor Create(const AFileName: String);
+    constructor Create(const AFileName: String; const ADependencies: TArray<String>);
     destructor Destroy; override;
   end;
 
@@ -154,7 +154,11 @@ end;
 
 class function TRoadKindHelper.FromString(const S: String): TRoadKind;
 begin
-  Result := TRoadKind(IndexStr(S, ValueStrings));
+  try
+    Result := TRoadKind(IndexStr(S, ValueStrings));
+  except
+    Result := rkUnclassified;
+  end;
 end;
 
 { TRoadElement }
@@ -175,11 +179,17 @@ end;
 
 { TPrologMapData }
 
-constructor TPrologMapData.Create(const AFileName: String);
+constructor TPrologMapData.Create(const AFileName: String; const ADependencies: TArray<String>);
+var
+  Dependency: String;
 begin
   inherited Create;
   FFileName := AFileName;
   Initialize;
+  for Dependency in ADependencies do
+  begin
+    WriteDependency(Dependency);
+  end;
 end;
 
 procedure TPrologMapData.Deinitialize;
