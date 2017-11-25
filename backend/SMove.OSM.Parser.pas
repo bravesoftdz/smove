@@ -1,4 +1,4 @@
-unit SMove.OSM.Parser;
+ï»¿unit SMove.OSM.Parser;
 
 interface
 
@@ -17,11 +17,13 @@ type
     private
       FXML: IXMLDocument;
       FResult: TList<TRoadElement>;
-      FNodeIds: TDictionary<string, TRoadElement>;
+      FNodeIds: TDictionary<string, TPointF>;
       procedure ProcessWay(AWay: IXMLNode);
-      procedure SaveWayForSecondStep(AWay: IXMLNode);
+      procedure ProcessTagsAndSave(AWay: IXMLNode);
       procedure ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
       procedure ProcessNode(ANode: IXMLNode);
+      function FindEndpoints(APoints: TList<TPointF>): TEndPoints;
+      function CalculateLength(APoints: TList<TPointF>): Double;
     public
       constructor Create;
       function Parse(AFilename: string): TList<TRoadElement>;
@@ -46,17 +48,20 @@ begin
     if Tag.HasAttribute('k') then
       if Tag.Attributes['k']='highway' then
         begin
-          SaveWayForSecondStep(AWay);
+          ProcessTagsAndSave(AWay);
           break;
         end;
   end;
 end;
 
-procedure TOSMParser.SaveWayForSecondStep(AWay: IXMLNode);
+procedure TOSMParser.ProcessTagsAndSave(AWay: IXMLNode);
 var Tag: IXMLNode;
     i: integer;
     NewRoad: TRoadElement;
+    NewNodes: TList<TPointF>;
 begin
+  NewRoad.Slope := slEven;
+  NewNodes := TList<TPointF>.Create;
   for i:=0 to AWay.ChildNodes.Count-1 do
   begin
     Tag := AWay.ChildNodes.Get(i);
@@ -64,7 +69,14 @@ begin
       begin
         ProcessTag(Tag,NewRoad);
       end;
+    if Tag.HasAttribute('ref') then
+      begin
+        NewNodes.Add(FNodeIds.Items[Tag.Attributes['ref']]);
+      end;
   end;
+  NewRoad.EndPoints := FindEndpoints(NewNodes); 
+  NewRoad.Length := CalculateLength(NewNodes);
+  FResult.Add(NewRoad);
 end;
 
 procedure TOSMParser.ProcessTag(ATag: IXMLNode; ARoad: TRoadElement);
@@ -119,9 +131,9 @@ begin
       if ATag.Attributes['v'] = 'down' then
         ARoad.Slope := slDown;
       s := ATag.Attributes['v'];
-      if s[Length(s)] in ['%','°'] then
+      if s[Length(s)] in ['%','ï¿½'] then
       begin
-        ARoad.Slope := TSlope(Sign(s.TrimRight(['%','°',' ']).ToDouble));
+        ARoad.Slope := TSlope(Sign(s.TrimRight(['%','ï¿½',' ']).ToDouble));
       end;
     end;
 end;
@@ -131,17 +143,9 @@ var i: integer;
     Way, Node: IXMLNode;
     b: set of byte;
 begin
-  FNodeIds := TDictionary<string,TRoadElement>.Create;
+  FNodeIds := TDictionary<string, TPointF>.Create;
   FResult := TList<TRoadElement>.Create;
   FXML.LoadFromFile(AFilename);
-
-  //Process ways
-  for i:=0 to FXML.DocumentElement.ChildNodes.Count-1 do
-  begin
-    Way := FXML.DocumentElement.ChildNodes.Get(i);
-    if Way.NodeName = 'way' then
-      ProcessWay(Way);
-  end;
 
   //ProcessNodes
   for i:=0 to FXML.DocumentElement.ChildNodes.Count-1 do
@@ -149,6 +153,14 @@ begin
     Node := FXML.DocumentElement.ChildNodes.Get(i);
     if Node.NodeName = 'node' then
       ProcessNode(Node);
+  end;
+
+  //Process ways
+  for i:=0 to FXML.DocumentElement.ChildNodes.Count-1 do
+  begin
+    Way := FXML.DocumentElement.ChildNodes.Get(i);
+    if Way.NodeName = 'way' then
+      ProcessWay(Way);
   end;
 
   Result := FResult;
@@ -163,11 +175,26 @@ begin
   Coord.X := ANode.Attributes['lat'];
   //Longtitude
   Coord.Y := ANode.Attributes['lon'];
+  FNodeIds.Add(ANode.Attributes['id'], Coord);
 end;
 
 destructor TOSMParser.Destroy;
 begin
   FXML := nil;
+end;
+
+function TOSMParser.FindEndpoints(APoints: TList<TPointF>): TEndPoints;
+begin
+  Result[0] := APoints[0];
+  Result[1] := APoints[APoints.Count-1];
+end;
+
+function TOSMParser.CalculateLength(APoints: TList<TPointF>): Double;
+var i: Integer;
+begin
+  Result := 0;
+  for i:=1 to APoints.Count-1 do
+    Result := Result + APoints[i-1].Distance(APoints[i]);
 end;
 
 end.
