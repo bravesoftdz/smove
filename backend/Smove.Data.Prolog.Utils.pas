@@ -53,10 +53,10 @@ type
 
   TDangers = set of TDanger;
 
-  TSlope = (slUp = 1, slDown = -1);
+  TSlope = (slDown = -1, slEven = 0, slUp = 1);
 
   TRoadElement = record
-  public
+  private
     FKind: TRoadKind;
     FSurface: TSurface;
     FEndPoints: TEndPoints;
@@ -65,13 +65,13 @@ type
     FWidth: Double;
     FSlope: TSlope;
   public
-    property Kind: TRoadKind read FKind;
-    property Surface: TSurface read FSurface;
-    property EndPoints: TEndPoints read FEndPoints;
-    property Dangers: TDangers read FDangers;
-    property Length: Double read FLength;
-    property Width: Double read FWidth;
-    property Slope: TSlope read FSlope;
+    property Kind: TRoadKind read FKind write FKind;
+    property Surface: TSurface read FSurface write FSurface;
+    property EndPoints: TEndPoints read FEndPoints write FEndPoints;
+    property Dangers: TDangers read FDangers write FDangers;
+    property Length: Double read FLength write FLength;
+    property Width: Double read FWidth write FWidth;
+    property Slope: TSlope read FSlope write FSlope;
     constructor Create(const AKind: TRoadKind; const ASurface: TSurface;
       const AEndPoints: TEndPoints; const ADangers: TDangers;
       const ALength, AWidth: Double; const ASlope: TSlope);
@@ -86,8 +86,10 @@ type
     property FactsFile: TextFile read FFactsFile;
     procedure Initialize; virtual;
     procedure Deinitialize; virtual;
+    procedure WriteDependency(const AFileName: String);
     procedure WriteFact(const APredicate: String;
       const AArguments: TArray<String>);
+    procedure WriteRule(const A
   public
     property FileName: String read FFileName;
     property Elements: TArray<TRoadElement> write SetElements;
@@ -208,6 +210,11 @@ begin
       Byte(Element.Dangers).ToString, Element.Length.ToString,
       Element.Width.ToString, Ord(Element.Slope).ToString]);
   end;
+end;
+
+procedure TPrologMapData.WriteDependency(const AFileName: String);
+begin
+  WriteLn(FFactsFile, Concat('[', ExtractFileName(AFileName), ']'));
 end;
 
 procedure TPrologMapData.WriteFact(const APredicate: String;
