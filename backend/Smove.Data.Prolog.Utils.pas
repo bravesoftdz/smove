@@ -3,13 +3,12 @@ unit Smove.Data.Prolog.Utils;
 interface
 
 uses
+  System.SysUtils,
+  System.StrUtils,
   System.Types,
   System.Win.Registry,
   Winapi.Windows,
   JvCreateProcess;
-
-const
-  NumberOfEndPoints = 2;
 
 type
   TPrologApplication = class
@@ -30,11 +29,21 @@ type
     destructor Destroy; override;
   end;
 
-  TEndPoints = array [0 .. Pred(NumberOfEndPoints)] of TPointF;
+  TEndPoints = array [0 .. 1] of TPointF;
 
   TRoadKind = (rkMotorway, rkTrunk, rkPrimary, rkSecondary, rkTertiary,
     rkUnclassified, rkResidential, rkService, rkFootway, rkBridleway, rkSteps,
     rkPath, rkCycleway);
+
+  TRoadKindHelper = record helper for TRoadKind
+  protected const
+    ValueStrings: array [TRoadKind] of String = ('motorway', 'trunk', 'primary',
+      'secondary', 'tertiary', 'unclassified', 'residential', 'service',
+      'footway', 'bridleway', 'steps', 'path', 'cycleway');
+  public
+    function ToString: String;
+    class function FromString(const S: String): TRoadKind; static;
+  end;
 
   TSurface = (sfPaved, sfAsphalt, sfSett, sfConcrete, sfPavingStones,
     sfCobbleStone, sfMetal, sfWood, sfUnpaved, sfCompacted, sfDirt, sfEarth,
@@ -52,6 +61,7 @@ type
     FSurface: TSurface;
     FEndPoints: TEndPoints;
     FDangers: TDangers;
+    FLength: Double;
     FWidth: Double;
     FSlope: TSlope;
   public
@@ -59,26 +69,30 @@ type
     property Surface: TSurface read FSurface;
     property EndPoints: TEndPoints read FEndPoints;
     property Dangers: TDangers read FDangers;
+    property Length: Double read FLength;
     property Width: Double read FWidth;
     property Slope: TSlope read FSlope;
     constructor Create(const AKind: TRoadKind; const ASurface: TSurface;
       const AEndPoints: TEndPoints; const ADangers: TDangers;
-      const AWidth: Double; const ASlope: TSlope);
+      const ALength, AWidth: Double; const ASlope: TSlope);
   end;
 
   TPrologMapData = class
   private
     FFileName: String;
     FFactsFile: TextFile;
+    procedure SetElements(const Value: TArray<TRoadElement>);
   protected
     property FactsFile: TextFile read FFactsFile;
     procedure Initialize; virtual;
     procedure Deinitialize; virtual;
+    procedure WriteFact(const APredicate: String;
+      const AArguments: TArray<String>);
   public
     property FileName: String read FFileName;
+    property Elements: TArray<TRoadElement> write SetElements;
     constructor Create(const AFileName: String);
     destructor Destroy; override;
-
   end;
 
 implementation
@@ -128,16 +142,30 @@ begin
   FCreateProcess.CommandLine := FactsFileName;
 end;
 
+{ TRoadKindHelper }
+
+function TRoadKindHelper.ToString: String;
+begin
+  Result := ValueStrings[Self];
+end;
+
+class function TRoadKindHelper.FromString(const S: String): TRoadKind;
+begin
+  Result := TRoadKind(IndexStr(S, ValueStrings));
+end;
+
 { TRoadElement }
 
 constructor TRoadElement.Create(const AKind: TRoadKind;
   const ASurface: TSurface; const AEndPoints: TEndPoints;
-  const ADangers: TDangers; const AWidth: Double; const SSlope: TSlope);
+  const ADangers: TDangers; const ALength, AWidth: Double;
+  const ASlope: TSlope);
 begin
   FKind := AKind;
   FSurface := ASurface;
   FEndPoints := AEndPoints;
   FDangers := ADangers;
+  FLength := ALength;
   FWidth := AWidth;
   FSlope := ASlope;
 end;
@@ -166,6 +194,27 @@ procedure TPrologMapData.Initialize;
 begin
   AssignFile(FFactsFile, FileName);
   Rewrite(FFactsFile);
+end;
+
+procedure TPrologMapData.SetElements(const Value: TArray<TRoadElement>);
+var
+  Element: TRoadElement;
+begin
+  for Element in Value do
+  begin
+    WriteFact(Element.Kind.ToString, [Ord(Element.Surface).ToString,
+      Element.EndPoints[0].X.ToString, Element.EndPoints[0].Y.ToString,
+      Element.EndPoints[1].X.ToString, Element.EndPoints[1].Y.ToString,
+      Byte(Element.Dangers).ToString, Element.Length.ToString,
+      Element.Width.ToString, Ord(Element.Slope).ToString]);
+  end;
+end;
+
+procedure TPrologMapData.WriteFact(const APredicate: String;
+  const AArguments: TArray<String>);
+begin
+  WriteLn(FFactsFile, Concat(APredicate, IfThen(Length(AArguments) <> 0,
+    Concat('(', String.Join(',', AArguments), ')')), '.'));
 end;
 
 end.
