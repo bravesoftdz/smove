@@ -160,7 +160,7 @@ begin
     Index := IndexStr(S, ValueStrings);
     if Index < 0 then
     begin
-      //raise Exception.CreateFmt('Invalid road kind string: ''%s''', [S]);
+      raise Exception.CreateFmt('Invalid road kind string: ''%s''', [S]);
     end;
     Result := TRoadKind(Index);
   except

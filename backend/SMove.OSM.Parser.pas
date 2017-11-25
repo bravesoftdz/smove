@@ -131,7 +131,7 @@ begin
       if ATag.Attributes['v'] = 'down' then
         ARoad.Slope := slDown;
       s := ATag.Attributes['v'];
-      if s[Length(s)] in ['%','�'] then
+      if s[Length(s)] in ['%','°'] then
       begin
         ARoad.Slope := TSlope(Sign(s.TrimRight(['%','�',' ']).ToDouble));
       end;
@@ -141,7 +141,6 @@ end;
 function TOSMParser.Parse(AFilename: string): TList<TRoadElement>;
 var i: integer;
     Way, Node: IXMLNode;
-    b: set of byte;
 begin
   FNodeIds := TDictionary<string, TPointF>.Create;
   FResult := TList<TRoadElement>.Create;
